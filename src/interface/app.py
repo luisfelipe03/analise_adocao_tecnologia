@@ -3,35 +3,22 @@ from pathlib import Path
 import streamlit as st
 import pandas as pd
 
-# ==============================================================================
-# CONFIGURAÇÃO DE CAMINHOS (PATH)
-# ==============================================================================
-# Identifica onde este arquivo (app.py) está: .../src/Interface/app.py
 FILE_PATH = Path(__file__).resolve()
-INTERFACE_DIR = FILE_PATH.parent  # .../src/Interface
-SRC_DIR = INTERFACE_DIR.parent    # .../src
+INTERFACE_DIR = FILE_PATH.parent 
+SRC_DIR = INTERFACE_DIR.parent 
 
-# Adiciona o diretório 'src' ao sistema para permitir importações como 'from analysis...'
 sys.path.append(str(SRC_DIR))
 
-# Importando as funções estatísticas
 try:
-    # Como adicionamos 'src' ao path, podemos importar 'analysis' diretamente
     from analysis.stats import *
 except ImportError as e:
     st.error(f"Erro ao importar módulos. Verifique a estrutura de pastas. Detalhe: {e}")
     st.stop()
 
-# Configuração da Página
 st.set_page_config(page_title="Adoção de Tecnologias", layout="wide")
 
-# ==============================================================================
-# CARREGAMENTO DE DADOS
-# ==============================================================================
 @st.cache_data
 def load_data():
-    # Caminho Relativo: Sai de Interface, volta para src, entra em data
-    # .../src/data/database.csv
     csv_path = SRC_DIR / "data" / "database.csv"
     
     try:
@@ -46,18 +33,12 @@ if df.empty:
     st.warning("A base de dados está vazia ou não foi carregada corretamente.")
     st.stop()
 
-# Ordenação Cronológica para consistência visual
 ordem_periodos = ['Q1_2023', 'Q2_2023', 'Q3_2023', 'Q4_2023', 
                   'Q1_2024', 'Q2_2024', 'Q3_2024', 'Q4_2024', 'Q1_2025']
-# Filtra apenas períodos existentes no CSV
 ordem_periodos = [p for p in ordem_periodos if p in df['Periodo'].unique()]
 df['Periodo'] = pd.Categorical(df['Periodo'], categories=ordem_periodos, ordered=True)
 df = df.sort_values('Periodo')
 
-# ==============================================================================
-# SIDEBAR (FILTROS)
-# ==============================================================================
-st.sidebar.image("https://img.icons8.com/clouds/100/000000/statistics.png", width=100)
 st.sidebar.title("Filtros")
 
 periodos = st.sidebar.multiselect(
@@ -77,14 +58,9 @@ df_filtro = df[
     df["Tecnologia"].isin(tecnologias)
 ]
 
-# ==============================================================================
-# DASHBOARD PRINCIPAL
-# ==============================================================================
-
 st.title("📊 Análise Estatística: Adoção de Tecnologias (2023-2025)")
 st.markdown("*Dashboard interativo para suporte à apresentação de Estatística e Probabilidade.*")
 
-# KPIs
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 kpi1.metric("Adoção Média", f"{df_filtro['Taxa_Adocao_Percent'].mean():.2f}%")
 kpi2.metric("Investimento Médio", f"R$ {df_filtro['Investimento_Milhoes'].mean():.2f} Mi")
@@ -93,14 +69,12 @@ kpi4.metric("Tempo Implementação", f"{df_filtro['Tempo_Implementacao_Meses'].m
 
 st.markdown("---")
 
-# --- INTEGRANTE 1 ---
 st.header("1. Visão Geral da Amostra")
 st.caption("Primeiras linhas da base de dados carregada.")
 st.dataframe(df_filtro.head(), use_container_width=True)
 
-# --- INTEGRANTE 2 ---
 st.header("2. Estatística Descritiva")
-st.markdown("Observe o **CV (%)** para analisar volatilidade e a **Skewness** para assimetria.")
+st.markdown("Observe o **CV (%)** para analisar volatilidade e a **Distorção** para assimetria.")
 st.dataframe(estatistica_descritiva(df_filtro), use_container_width=True)
 
 col_desc1, col_desc2 = st.columns(2)
@@ -113,7 +87,6 @@ with col_desc2:
     - A **Satisfação** é consistente (CV baixo).
     """)
 
-# --- INTEGRANTE 3 ---
 st.markdown("---")
 st.header("3. Comparação e Eficiência")
 
@@ -125,14 +98,12 @@ with col_comp2:
 
 st.markdown("> **Insight:** API REST tem alta adoção com o menor tempo de implementação (mediana baixa).")
 
-# --- INTEGRANTE 4 ---
 st.markdown("---")
 st.header("4. Evolução Temporal")
 st.markdown("Comparativo de crescimento entre todas as tecnologias selecionadas.")
 
 st.pyplot(grafico_evolucao_comparativo(df_filtro))
 
-# --- INTEGRANTE 5 ---
 st.markdown("---")
 st.header("5. Correlações e Fatores")
 
@@ -144,20 +115,14 @@ with col_corr2:
 
 st.markdown("> **Insight:** A correlação entre Satisfação e Adoção é fortíssima (próxima de 1.0).")
 
-# --- INTEGRANTE 6 ---
 st.markdown("---")
 st.header("6. Probabilidade e Conclusão")
 
-# Cálculos
 p_simples, p_condicional = calcular_probabilidades(df_filtro)
 aumento_percentual = (p_condicional - p_simples) * 100
 
-# ---------------------------------------------------------
-# BLOCO 1: Probabilidades (O Impacto do Investimento)
-# ---------------------------------------------------------
 st.subheader("🎲 Previsão de Cenários (Frequentista)")
 
-# Layout: Métricas à esquerda, Gráfico visual à direita
 c_prob1, c_prob2, c_prob3 = st.columns([1, 1, 1.5])
 
 with c_prob1:
@@ -178,7 +143,6 @@ with c_prob2:
     st.caption("O investimento pesado quase **dobra** a chance de sucesso.")
 
 with c_prob3:
-    # Pequeno gráfico de barras para comparar visualmente
     df_prob = pd.DataFrame({
         "Cenário": ["Base", "Alto Invest."],
         "Probabilidade": [p_simples, p_condicional]
@@ -188,14 +152,10 @@ with c_prob3:
     ax_prob.set_xlim(0, 1)
     ax_prob.set_xlabel("Probabilidade de Sucesso")
     ax_prob.set_ylabel("")
-    # Adiciona os valores nas barras
     for i, v in enumerate([p_simples, p_condicional]):
         ax_prob.text(v + 0.02, i, f"{v:.1%}", va='center', fontweight='bold')
     st.pyplot(fig_prob)
 
-# ---------------------------------------------------------
-# BLOCO 2: Conclusão Final (Os 3 Pilares)
-# ---------------------------------------------------------
 st.markdown("---")
 st.subheader("🏆 Conclusões Finais: Os 3 Pilares da Adoção")
 

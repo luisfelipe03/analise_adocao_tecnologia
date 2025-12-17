@@ -2,7 +2,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# Variáveis Globais
 NUMERIC_COLS = [
     "Empresas_Adotantes",
     "Taxa_Adocao_Percent",
@@ -13,20 +12,15 @@ NUMERIC_COLS = [
 ]
 
 def estatistica_descritiva(df):
-    """
-    Gera tabela completa com medidas de tendência central, dispersão e forma.
-    """
+
     if df.empty:
         return pd.DataFrame()
         
     desc = df[NUMERIC_COLS].describe().T
     desc["mediana"] = df[NUMERIC_COLS].median()
-    # Coeficiente de Variação
     desc["CV (%)"] = (df[NUMERIC_COLS].std() / df[NUMERIC_COLS].mean()) * 100
-    # Assimetria
     desc["skewness"] = df[NUMERIC_COLS].skew()
     
-    # Seleção e renomeação
     cols_final = ["count", "mean", "mediana", "std", "min", "max", "CV (%)", "skewness"]
     return desc[cols_final].round(2)
 
@@ -49,7 +43,6 @@ def grafico_evolucao_comparativo(df):
     return fig
 
 def histograma_adocao(df):
-    """Mostra a distribuição dos dados."""
     fig, ax = plt.subplots(figsize=(6, 4))
     sns.histplot(df["Taxa_Adocao_Percent"], kde=True, ax=ax, color="#3498db")
     ax.set_title("Histograma: Distribuição da Taxa de Adoção")
@@ -57,7 +50,6 @@ def histograma_adocao(df):
     return fig
 
 def ranking_medio_adocao(df):
-    """Mostra quem são os líderes."""
     fig, ax = plt.subplots(figsize=(6, 4))
     rank = df.groupby("Tecnologia")["Taxa_Adocao_Percent"].mean().sort_values(ascending=False).reset_index()
     sns.barplot(data=rank, x="Taxa_Adocao_Percent", y="Tecnologia", ax=ax, palette="viridis")
@@ -66,7 +58,6 @@ def ranking_medio_adocao(df):
     return fig
 
 def boxplot_tempo(df):
-    """Mostra eficiência (quem é mais rápido)."""
     fig, ax = plt.subplots(figsize=(6, 4))
     sns.boxplot(data=df, x="Tecnologia", y="Tempo_Implementacao_Meses", ax=ax, palette="Set2")
     ax.set_title("Boxplot: Tempo de Implementação")
@@ -75,7 +66,6 @@ def boxplot_tempo(df):
     return fig
 
 def dispersao_satisfacao(df):
-    """Scatter plot: Satisfação x Adoção."""
     fig, ax = plt.subplots(figsize=(6, 4))
     sns.scatterplot(
         data=df, 
@@ -92,7 +82,6 @@ def dispersao_satisfacao(df):
     return fig
 
 def matriz_correlacao(df):
-    """Mapa de calor das correlações."""
     fig, ax = plt.subplots(figsize=(6, 5))
     corr = df[NUMERIC_COLS].corr()
     sns.heatmap(corr, annot=True, cmap="coolwarm", fmt=".2f", ax=ax)
@@ -100,7 +89,6 @@ def matriz_correlacao(df):
     return fig
 
 def calcular_probabilidades(df):
-    """Inferência Bayesiana/Frequentista."""
     total_obs = len(df)
     if total_obs == 0:
         return 0.0, 0.0
