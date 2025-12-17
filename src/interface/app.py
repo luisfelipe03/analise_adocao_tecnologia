@@ -67,11 +67,25 @@ kpi2.metric("Investimento Médio", f"R$ {df_filtro['Investimento_Milhoes'].mean(
 kpi3.metric("Satisfação Média", f"{df_filtro['Satisfacao_Media'].mean():.2f}")
 kpi4.metric("Tempo Implementação", f"{df_filtro['Tempo_Implementacao_Meses'].mean():.2f} Meses")
 
+st.subheader("Classificação das Variáveis")
+st.markdown("""
+Para esta análise estatística, classificamos as variáveis da seguinte forma:
+
+| Natureza | Tipo | Variáveis do Estudo |
+| :--- | :--- | :--- |
+| **Qualitativa** | *Nominal* | `Tecnologia` |
+| **Qualitativa** | *Ordinal* | `Periodo` (Ordem Cronológica) |
+| **Quantitativa** | *Discreta* | `Empresas_Adotantes`, `Profissionais_Treinados` |
+| **Quantitativa** | *Contínua* | `Taxa_Adocao`, `Investimento`, `Satisfacao`, `Tempo_Implementacao` |
+""")
+
 st.markdown("---")
 
 st.header("1. Visão Geral da Amostra")
 st.caption("Primeiras linhas da base de dados carregada.")
 st.dataframe(df_filtro.head(), use_container_width=True)
+
+st.info("**Nota Metodológica:** A variável resposta ($Y$) deste estudo é a **Taxa de Adoção**.")
 
 st.header("2. Estatística Descritiva")
 st.markdown("Observe o **CV (%)** para analisar volatilidade e a **Distorção** para assimetria.")
