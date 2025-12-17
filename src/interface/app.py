@@ -105,17 +105,6 @@ st.markdown("---")
 st.header("3. Comparação e Eficiência")
 
 col_comp1, col_comp2 = st.columns(2)
-with col_comp1:
-    st.pyplot(ranking_medio_adocao(df_filtro))
-with col_comp2:
-    st.pyplot(boxplot_tempo(df_filtro))
-
-st.markdown("> **Insight:** API REST tem alta adoção com o menor tempo de implementação (mediana baixa).")
-
-st.markdown("---")
-st.header("3. Comparação e Eficiência")
-
-col_comp1, col_comp2 = st.columns(2)
 
 with col_comp1:
     st.subheader("Quem domina o mercado?")
@@ -127,7 +116,6 @@ with col_comp2:
     st.pyplot(grafico_eficiencia_custo(df_filtro))
     st.caption("API REST é a campeã de eficiência (R$ 0,47 Mi por ponto).")
 
-# Boxplot abaixo para explicar o motivo (Tempo)
 st.subheader("Por que a eficiência varia? (O Fator Tempo)")
 col_esq, col_centro, col_dir = st.columns([1, 2, 1])
 
