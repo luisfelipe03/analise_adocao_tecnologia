@@ -108,3 +108,46 @@ def calcular_probabilidades(df):
         p_condicional = 0.0
         
     return p_simples, p_condicional
+
+def grafico_eficiencia_custo(df):
+    """
+    Gráfico de Custo x Benefício: Quanto custa cada 1% de Market Share?
+    Fundamental para o argumento do Integrante 3.
+    """
+    # 1. Agrupa e calcula as médias
+    metrics = df.groupby('Tecnologia')[['Taxa_Adocao_Percent', 'Investimento_Milhoes']].mean()
+    
+    # 2. Calcula o indicador: Investimento Necessário para 1% de Adoção
+    # (Quanto menor, mais eficiente)
+    metrics['Custo_por_Ponto'] = metrics['Investimento_Milhoes'] / metrics['Taxa_Adocao_Percent']
+    metrics = metrics.sort_values('Custo_por_Ponto', ascending=True).reset_index()
+
+    # 3. Plotagem
+    fig, ax = plt.subplots(figsize=(8, 5))
+    
+    # Paleta customizada: Verdes para os eficientes, Vermelhos para os caros
+    # Usando 'RdYlGn_r' (Red-Yellow-Green reversed) para que valores baixos sejam verdes
+    sns.barplot(
+        data=metrics, 
+        x='Custo_por_Ponto', 
+        y='Tecnologia', 
+        palette='RdYlGn_r', 
+        ax=ax
+    )
+    
+    # Títulos e Eixos
+    ax.set_title("Custo Médio para Conquistar 1% de Mercado (Menor é Melhor)")
+    ax.set_xlabel("Investimento (Milhões) por 1% de Adoção")
+    ax.set_ylabel("")
+    
+    # Adiciona os valores nas barras para facilitar a leitura
+    for i, v in enumerate(metrics['Custo_por_Ponto']):
+        ax.text(v + 0.02, i, f"R$ {v:.2f} Mi", va='center', fontweight='bold', fontsize=10)
+        
+    # Linha de referência do Cloud (Benchmark)
+    # Pega o valor do Cloud para desenhar a linha
+    val_cloud = metrics.loc[metrics['Tecnologia'] == 'Cloud_Computing', 'Custo_por_Ponto'].values[0]
+    ax.axvline(val_cloud, color='red', linestyle='--', alpha=0.5)
+    ax.text(val_cloud, len(metrics)-0.5, " Benchmark (Cloud)", color='red', va='center')
+    
+    return fig
